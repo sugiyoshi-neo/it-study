@@ -1,0 +1,566 @@
+/* スマホ(幅 360px)優先。色は CSS 変数で管理し、ダークモードは端末の設定に従う */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1f2328;
+  --muted: #5d6670;
+  --border: #d5d9de;
+  --primary: #2563eb;
+  --primary-text: #ffffff;
+  --selected-bg: #e8effd;
+  --ok: #157f3b;
+  --ok-bg: #e6f5ec;
+  --ng: #c62828;
+  --ng-bg: #fdecec;
+  --warn-bg: #fff6dc;
+  --warn-border: #e7c35a;
+  --analogy-bg: #eef6ff;
+  --radius: 12px;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111418;
+    --surface: #1b2027;
+    --text: #e6e8eb;
+    --muted: #9aa4af;
+    --border: #353c45;
+    --primary: #5b8def;
+    --primary-text: #0b0f14;
+    --selected-bg: #1f2d48;
+    --ok: #5fcf86;
+    --ok-bg: #16301f;
+    --ng: #ff7b7b;
+    --ng-bg: #3a1c1c;
+    --warn-bg: #352d14;
+    --warn-border: #8a7330;
+    --analogy-bg: #172435;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+a {
+  color: var(--primary);
+}
+
+h1 {
+  font-size: 1.4rem;
+  line-height: 1.4;
+  margin: 0.5rem 0;
+}
+
+h2 {
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.card h2 {
+  font-size: 0.95rem;
+  margin: 0 0 0.4rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ---- レイアウト ---- */
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.6rem 1rem;
+  padding-top: calc(0.6rem + env(safe-area-inset-top));
+}
+
+.app-title {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.app-main {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.page {
+  padding: 0.5rem 1rem 1rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  margin: 0.8rem 0;
+}
+
+.card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.card p {
+  margin: 0;
+}
+
+.notice {
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.analogy {
+  background: var(--analogy-bg);
+}
+
+/* ---- ボタン ---- */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.button.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-text);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button.block {
+  display: flex;
+  width: 100%;
+  margin: 0.8rem 0;
+}
+
+.small-button {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 600;
+  padding: 0.4rem 0;
+  min-height: 44px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* 画面下部に固定する操作ボタン(親指の届く範囲) */
+.action-bar {
+  position: sticky;
+  bottom: 0;
+  margin: 1rem -1rem -1rem;
+  padding: 0.6rem 1rem;
+  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.action-bar > .button {
+  width: 100%;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.action-hint {
+  margin: 0 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---- 出題の選び方 ---- */
+
+.field-group h3 {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.category {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 0.5rem 0;
+}
+
+.category summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  min-height: 48px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.category .count {
+  color: var(--muted);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* 開閉できることが分かるように印を付ける */
+.category .count::after {
+  content: " ▾";
+}
+
+.category[open] .count::after {
+  content: " ▴";
+}
+
+.category > .button.block {
+  width: calc(100% - 2rem);
+  margin: 0 1rem 0.5rem;
+}
+
+.topic-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 1rem 0.6rem;
+}
+
+.topic-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+/* ---- 演習 ---- */
+
+.progress {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.3rem 0;
+  font-weight: 600;
+}
+
+.progress .muted {
+  font-weight: 400;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.prompt {
+  font-size: 1.05rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0.5rem 0;
+}
+
+.aid {
+  background: var(--analogy-bg);
+}
+
+.choices {
+  list-style: none;
+  margin: 0.8rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 56px;
+  padding: 0.8rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choice:disabled {
+  cursor: default;
+}
+
+.choice.selected {
+  border-color: var(--primary);
+  background: var(--selected-bg);
+}
+
+.choice.correct {
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.choice.wrong {
+  border-color: var(--ng);
+  background: var(--ng-bg);
+}
+
+.choice-id {
+  flex-shrink: 0;
+  font-weight: 700;
+  min-width: 1.5em;
+}
+
+.choice-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.choice-mark {
+  width: 100%;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.choice.correct .choice-mark {
+  color: var(--ok);
+}
+
+.choice.wrong .choice-mark {
+  color: var(--ng);
+}
+
+.numeric label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1rem 0 0.4rem;
+  font-weight: 600;
+}
+
+.numeric input {
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0.5rem 0.8rem;
+  font: inherit;
+  font-size: 1.2rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.numeric input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.error {
+  color: var(--ng);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.feedback {
+  scroll-margin-top: 4rem;
+}
+
+.verdict {
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  margin: 0.8rem 0;
+  border: 2px solid;
+}
+
+.verdict p {
+  margin: 0;
+}
+
+.verdict.ok {
+  border-color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.verdict.ng {
+  border-color: var(--ng);
+  background: var(--ng-bg);
+}
+
+.verdict-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.verdict.ok .verdict-title {
+  color: var(--ok);
+}
+
+.verdict.ng .verdict-title {
+  color: var(--ng);
+}
+
+.wrong-reason {
+  background: var(--warn-bg);
+  border: 2px solid var(--warn-border);
+  font-size: 1.05rem;
+}
+
+.prereq a {
+  font-weight: 600;
+}
+
+/* ---- 結果 ---- */
+
+.score {
+  font-size: 1.2rem;
+}
+
+.score strong {
+  font-size: 1.6rem;
+}
+
+.result-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.result-list li {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.result-mark {
+  flex-shrink: 0;
+  font-weight: 700;
+  width: 1.5em;
+}
+
+.result-list li.ok .result-mark {
+  color: var(--ok);
+}
+
+.result-list li.ng .result-mark {
+  color: var(--ng);
+}
+
+.result-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.result-prompt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.9rem;
+}
+
+/* ---- 教材の Markdown ---- */
+
+.md > :first-child {
+  margin-top: 0;
+}
+
+.md > :last-child {
+  margin-bottom: 0;
+}
+
+.md p {
+  margin: 0.4rem 0;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.md table {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.md th,
+.md td {
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.6rem;
+  white-space: nowrap;
+}
+
+.md code {
+  font-family: ui-monospace, Consolas, monospace;
+  background: var(--bg);
+  padding: 0 0.25em;
+  border-radius: 4px;
+}
+
+.md pre {
+  overflow-x: auto;
+  background: var(--bg);
+  padding: 0.6rem;
+  border-radius: 8px;
+}
+
+.md pre code {
+  padding: 0;
+}
