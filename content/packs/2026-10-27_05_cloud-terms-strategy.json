@@ -1,0 +1,819 @@
+{
+  "schemaVersion": 1,
+  "packId": "2026-10-27_05_cloud-terms-strategy",
+  "title": "クラウド・基盤、実務のIT用語、マネジメント・ストラテジ",
+  "createdAt": "2026-10-27",
+  "sources": [
+    { "key": "it1", "title": "IT理解1", "url": "https://claude.ai/chat/074f9bb7-cb22-42c6-b485-e5c99e66983e", "date": "2026-10-15" },
+    { "key": "terms", "title": "IT用語の理解", "url": "https://claude.ai/chat/6ddf3eaf-e527-49a9-a62b-b0380786e063", "date": "2026-10-10" },
+    { "key": "lp", "title": "線形計画法の計算問題", "url": "https://claude.ai/chat/ecaace4a-dabf-476a-9938-16e9a96e6f0b", "date": "2026-10-23" },
+    { "key": "fe1", "title": "基本情報1", "url": "https://claude.ai/chat/255dd3d2-9929-44d1-b955-cbbaf5455d3b", "date": "2026-10-17" },
+    { "key": "fe3", "title": "基本情報3", "url": "https://claude.ai/chat/600c9b0f-4a85-4b6c-bdc0-c3dbaa2ac2bf", "date": "2026-10-17" },
+    { "key": "fe4", "title": "基本情報4", "url": "https://claude.ai/chat/85d39993-3e82-4072-afa4-ab186bc9c3f8", "date": "2026-10-18" }
+  ],
+  "topics": [
+    {
+      "id": "cloud-service-models",
+      "title": "IaaS・PaaS・SaaS と責任共有モデル",
+      "field": "テクノロジ系",
+      "category": "システム構成要素",
+      "level": 1,
+      "sources": ["it1"],
+      "summary": "違いは「クラウド事業者がどこまで用意してくれるか」。IaaS はインフラだけ、PaaS は OS・ミドルウェア・実行環境まで、SaaS はアプリまで完成品で提供。",
+      "analogy": "ピザで例えると、IaaS は台所を借りて自分で作る、PaaS は生地と具材が揃っていて焼くだけ、SaaS は完成品が届く。",
+      "keyPoints": [
+        "IaaS:サーバ・ストレージ・ネットワーク(インフラ)だけ。例:AWS EC2",
+        "PaaS:インフラ+OS・ミドルウェア・実行環境。例:Google App Engine、Heroku",
+        "SaaS:アプリまで完成品。例:Gmail、Microsoft 365、Salesforce",
+        "見分け方:OS を利用者が選んで管理 → IaaS、開発環境が提供 → PaaS、ソフトをそのまま使う → SaaS",
+        "自分で持つ範囲が広い(オンプレ・IaaS)ほど自由だが手間と責任が増える",
+        "責任共有モデル:IaaS で OS の脆弱性を放置したら利用者の責任",
+        "間の選択肢:コンテナ(IaaS と PaaS の間)、サーバーレス(PaaS よりさらに任せる。AWS Lambda など)"
+      ],
+      "diagram": {
+        "type": "mermaid",
+        "code": "flowchart TB\n  APP[\"アプリケーション\"] --- MW[\"ミドルウェア・実行環境\"] --- OS[\"OS\"] --- HV[\"ハイパーバイザ(仮想化)\"] --- HW[\"物理サーバ・ネットワーク\"]\n  S[\"SaaS:アプリまで提供\"] -.-> APP\n  P[\"PaaS:ミドルウェアまで提供\"] -.-> MW\n  I[\"IaaS:インフラまで提供\"] -.-> HV"
+      },
+      "explanation": [
+        "SIer の仕事では、顧客の要件(コスト、セキュリティ、自由度、運用体制)を見て「この部分は SaaS、基幹系は IaaS で自社管理」のように線引きを提案すること自体が、重要な役割の一つです。"
+      ],
+      "pitfalls": [],
+      "prerequisites": ["infra-vs-platform"],
+      "related": ["infra-virtualization", "infra-container"],
+      "terms": [
+        { "term": "IaaS", "definition": "Infrastructure as a Service。サーバなどのインフラをサービスとして提供する。" },
+        { "term": "PaaS", "definition": "Platform as a Service。アプリを動かす基盤(OS・ミドルウェア・実行環境)まで提供する。" },
+        { "term": "SaaS", "definition": "Software as a Service。アプリケーションをサービスとして提供する。" },
+        { "term": "責任共有モデル", "definition": "クラウドで、事業者と利用者がセキュリティなどの責任範囲を分担する考え方。" }
+      ],
+      "questions": [
+        {
+          "id": "q-cloud-1",
+          "type": "choice",
+          "prompt": "利用者が OS を選んでインストールし、その上のミドルウェアやアプリも自分で管理するクラウドサービスの形態はどれか。",
+          "choices": [
+            { "id": "ア", "text": "IaaS" },
+            { "id": "イ", "text": "PaaS" },
+            { "id": "ウ", "text": "SaaS" },
+            { "id": "エ", "text": "DaaS" }
+          ],
+          "answer": "ア",
+          "explanation": "事業者が提供するのはインフラ(仮想マシン)まで。OS から上は利用者が管理します。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        },
+        {
+          "id": "q-cloud-2",
+          "type": "choice",
+          "prompt": "IaaS を利用しているシステムで、仮想マシンの OS の脆弱性が放置され、攻撃を受けた。責任共有モデルの考え方で、主に責任を負うのは誰か。",
+          "choices": [
+            { "id": "ア", "text": "クラウド事業者" },
+            { "id": "イ", "text": "利用者" },
+            { "id": "ウ", "text": "OS の開発元" },
+            { "id": "エ", "text": "通信事業者" }
+          ],
+          "answer": "イ",
+          "explanation": "IaaS では OS から上は利用者の管理範囲なので、OS の更新も利用者の責任です。",
+          "stumbleTags": ["why"],
+          "origin": "original",
+          "difficulty": 2
+        }
+      ]
+    },
+    {
+      "id": "infra-vs-platform",
+      "title": "インフラ・プラットフォーム・バックエンドの違い",
+      "field": "実務・IT用語",
+      "category": "システム基盤",
+      "level": 1,
+      "sources": ["it1"],
+      "summary": "インフラは機械そのもの(サーバ・ストレージ・ネットワーク)、プラットフォームはその上でアプリを動かすソフト環境(OS・ミドルウェア・実行環境)。バックエンドは「アプリのサーバ側のプログラム」で、分け方の軸が別。",
+      "analogy": "インフラ = 土地・電気・水道、プラットフォーム = その上に建てた建物と設備、アプリ = そこで営むお店。",
+      "keyPoints": [
+        "インフラ:サーバ(CPU・メモリ)、ストレージ、ネットワーク",
+        "プラットフォーム:OS(Linux、Windows Server)、ミドルウェア(Web サーバ、DB)、実行環境(Java、Python)",
+        "フロントエンド/バックエンド:アプリを「どこで動く処理か」で分けたもの",
+        "バックエンドは、インフラやプラットフォームの上に乗っかる",
+        "「サーバ」には2つの意味:ハードとしてのサーバ(機械)と、ソフトとしてのサーバ(Nginx、MySQL などのプログラム)",
+        "1台の機械に OS を入れ、その上で Web サーバや DB サーバのソフトを動かす、という積み重ね",
+        "プラットフォームの代表例:RHEL + Tomcat + Oracle Database のような構成"
+      ],
+      "explanation": [
+        "**プラットフォームの層**\n1. OS:RHEL、Ubuntu、Amazon Linux、Windows Server\n2. ミドルウェア:Web サーバ(Nginx、Apache)、AP サーバ(Tomcat、WebLogic)、DB(Oracle、MySQL、PostgreSQL、SQL Server)、メッセージキュー(Kafka、RabbitMQ)\n3. 実行環境:JVM、Python、Node.js、.NET\n4. コンテナ基盤:Docker、Kubernetes\n5. まとめて提供する PaaS:Elastic Beanstalk、App Engine、Azure App Service、マネージド DB(Amazon RDS、Cloud SQL)",
+        "現場では、サーバや DB の構築・運用まで含めて広く「バックエンド側」と呼ぶこともあるので、混同されやすいのは自然です。"
+      ],
+      "pitfalls": [
+        { "text": "「インフラやプラットフォームがいわゆるバックエンド?」と聞いた。切り口(分け方の軸)が別物。", "sourceKey": "it1" }
+      ],
+      "prerequisites": [],
+      "related": ["cloud-service-models", "os-linux-server", "infra-virtualization"],
+      "terms": [
+        { "term": "ミドルウェア", "definition": "OS とアプリの間で、データベースや Web サーバなど共通の機能を提供するソフトウェア。" },
+        { "term": "バックエンド", "definition": "ログイン認証やデータ保存など、サーバ側で動くアプリの処理。" },
+        { "term": "フロントエンド", "definition": "画面表示や操作など、利用者の手元(ブラウザ・スマホ)で動く部分。" }
+      ],
+      "questions": [
+        {
+          "id": "q-infra-1",
+          "type": "choice",
+          "prompt": "インフラ、プラットフォーム、バックエンドの関係として最も適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "インフラとプラットフォームを合わせたものをバックエンドと呼ぶ" },
+            { "id": "イ", "text": "バックエンドはアプリのサーバ側の処理で、インフラやプラットフォームはそれが乗る土台である" },
+            { "id": "ウ", "text": "プラットフォームはフロントエンドの一部である" },
+            { "id": "エ", "text": "インフラはソフトウェア、プラットフォームはハードウェアを指す" }
+          ],
+          "answer": "イ",
+          "explanation": "フロント/バックは「アプリのどこで動く処理か」、インフラ/プラットフォームは「アプリを動かす土台の層」で、分け方の軸が違います。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        },
+        {
+          "id": "q-infra-2",
+          "type": "choice",
+          "prompt": "次のうち、プラットフォーム(インフラの上でアプリを動かすためのソフトウェア環境)に含まれないものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "Linux" },
+            { "id": "イ", "text": "MySQL" },
+            { "id": "ウ", "text": "ルータ" },
+            { "id": "エ", "text": "Tomcat" }
+          ],
+          "answer": "ウ",
+          "explanation": "ルータはネットワーク機器で、インフラです。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "os-linux-server",
+      "title": "サーバに Linux が多い理由",
+      "field": "実務・IT用語",
+      "category": "システム基盤",
+      "level": 1,
+      "sources": ["it1"],
+      "summary": "特別に能力が高いというより、サーバに求められる条件と Linux の性質がよく噛み合っている。",
+      "keyPoints": [
+        "無料(オープンソース)で、台数を増やしても OS 代が膨らまない",
+        "GUI なしで動かせて軽い",
+        "安定していて止まりにくい",
+        "SSH で遠隔操作でき、シェルスクリプトで自動化しやすい",
+        "ソースコードが公開されていて、用途に合わせて調整できる",
+        "主要なサーバ用ソフト(Nginx、MySQL、Docker など)が Linux 前提で育ってきた",
+        "Windows Server も、Active Directory や .NET アプリを使う企業システムで今も多い"
+      ],
+      "explanation": [],
+      "pitfalls": [],
+      "prerequisites": ["infra-vs-platform"],
+      "related": [],
+      "terms": [
+        { "term": "SSH", "definition": "離れた場所のコンピュータに、暗号化された通信でログインして操作するプロトコル。" },
+        { "term": "オープンソース", "definition": "ソースコードが公開され、利用・改変・再配布が認められているソフトウェア。" }
+      ],
+      "questions": [
+        {
+          "id": "q-linux-1",
+          "type": "choice",
+          "prompt": "サーバ OS として Linux が広く使われる理由として適切でないものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "ライセンス費用がかからず、台数を増やしやすい" },
+            { "id": "イ", "text": "GUI なしで動かせるので、資源を本来の処理に回せる" },
+            { "id": "ウ", "text": "GUI での操作が必須で、初心者でも使いやすい" },
+            { "id": "エ", "text": "SSH での遠隔操作やスクリプトでの自動化がしやすい" }
+          ],
+          "answer": "ウ",
+          "explanation": "サーバは画面を見ながら操作しないので、GUI なしで動かせることがむしろ強みです。",
+          "stumbleTags": ["why"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "infra-virtualization",
+      "title": "仮想化(ハイパーバイザと仮想マシン)",
+      "field": "テクノロジ系",
+      "category": "システム構成要素",
+      "level": 2,
+      "sources": ["it1"],
+      "summary": "1台の物理マシンを、ソフトの力で複数台のマシンに見せかける技術。1つの OS の上で複数のソフトを同時に動かす(同居)のは仮想化ではない。",
+      "keyPoints": [
+        "物理サーバの上にハイパーバイザ(VMware、KVM、Hyper-V など)を入れる",
+        "その上に仮想マシン(VM)を何台も作る。各 VM は独立した OS を持つ",
+        "1台に Web と DB を同居させるのは、1つの OS で複数ソフトを動かしているだけ(仮想化ではない)",
+        "メリット:物理マシンを買い足さずにサーバを増やせる、VM 同士が影響しにくい、VM を丸ごとコピー・移動できる",
+        "IaaS は仮想化の上に成り立つ(EC2 で借りるのは VM)"
+      ],
+      "explanation": [
+        "例:1台の強力なサーバを「Web サーバ用 VM(Linux)」「DB サーバ用 VM(Linux)」「社内システム用 VM(Windows Server)」に分けて使う。"
+      ],
+      "pitfalls": [
+        { "text": "1台に Web と DB を同居させる話を「仮想化技術ってやつ?」と結び付けた。同居は、スマホで LINE と音楽アプリを同時に動かすのと同じ。", "sourceKey": "it1" }
+      ],
+      "prerequisites": ["infra-vs-platform"],
+      "related": ["infra-container", "cloud-service-models"],
+      "terms": [
+        { "term": "ハイパーバイザ", "definition": "物理マシンの上で複数の仮想マシンを動かし、管理するソフトウェア。" },
+        { "term": "仮想マシン(VM)", "definition": "ソフトウェアで作られた、独立した OS を持つ仮想的なコンピュータ。" }
+      ],
+      "questions": [
+        {
+          "id": "q-virt-1",
+          "type": "choice",
+          "prompt": "仮想化の説明として正しいものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "1つの OS の上で Web サーバと DB サーバのソフトを同時に動かすこと" },
+            { "id": "イ", "text": "ハイパーバイザを使い、1台の物理マシン上で独立した OS を持つ複数の仮想マシンを動かすこと" },
+            { "id": "ウ", "text": "複数の物理マシンを1本のケーブルでつなぐこと" },
+            { "id": "エ", "text": "アプリを画面のないサーバで動かすこと" }
+          ],
+          "answer": "イ",
+          "explanation": "アは1つの OS 上での同居で、仮想化ではありません。",
+          "wrongReasons": {
+            "ア": "1つの OS の上で複数のソフトを動かしているだけです。仮想化は、1台を複数台のマシン(それぞれ OS を持つ)に見せかける技術です。"
+          },
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "infra-container",
+      "title": "コンテナ(Docker・Kubernetes)",
+      "field": "テクノロジ系",
+      "category": "システム構成要素",
+      "level": 2,
+      "sources": ["it1"],
+      "summary": "OS の中核(カーネル)は共有しつつ、アプリとそれが動くのに必要なもの(ライブラリ・ランタイム・設定)を1つの箱にまとめて隔離する技術。VM より軽く、数秒以内で起動できる。",
+      "analogy": "VM は一軒家を何軒も建てる(それぞれに基礎も水道もある)。コンテナはマンションの部屋を分ける(建物と水道は共有、部屋の中は独立)。",
+      "keyPoints": [
+        "VM:VM ごとに OS を丸ごと持つ。重く、起動に数十秒〜数分",
+        "コンテナ:OS(カーネル)は共有し、アプリ部分だけを分ける。軽く、すぐ起動",
+        "「自分の PC では動いたのに本番で動かない」が起きにくい(箱ごと持っていける)",
+        "軽いので1台に何十個も載せられ、増減も速い",
+        "Docker:箱を作って動かす。Kubernetes:大量の箱の配置や再起動を自動管理",
+        "VM の上でコンテナを動かす組み合わせもよく使われる"
+      ],
+      "explanation": [],
+      "pitfalls": [],
+      "prerequisites": ["infra-virtualization"],
+      "related": ["cloud-service-models"],
+      "terms": [
+        { "term": "コンテナ", "definition": "OS のカーネルを共有しつつ、アプリと実行環境を隔離してまとめる仕組み。" },
+        { "term": "Kubernetes", "definition": "多数のコンテナの配置・起動・増減などを自動で管理する基盤。" }
+      ],
+      "questions": [
+        {
+          "id": "q-cont-1",
+          "type": "choice",
+          "prompt": "コンテナ型仮想化と、ハイパーバイザ型の仮想マシンの違いとして正しいものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "コンテナは、コンテナごとに独立した OS を丸ごと持つ" },
+            { "id": "イ", "text": "コンテナは OS のカーネルを共有し、アプリと実行環境だけを隔離するので軽い" },
+            { "id": "ウ", "text": "仮想マシンの方が起動が速い" },
+            { "id": "エ", "text": "コンテナは物理サーバ上でしか動かせない" }
+          ],
+          "answer": "イ",
+          "explanation": "VM は OS を丸ごと持つので重く、コンテナは OS を共有するので軽い。VM の上でコンテナを動かすこともできます。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        },
+        {
+          "id": "q-cont-2",
+          "type": "choice",
+          "prompt": "大量のコンテナの配置、再起動、増減などを自動で管理するソフトウェアはどれか。",
+          "choices": [
+            { "id": "ア", "text": "Docker" },
+            { "id": "イ", "text": "Kubernetes" },
+            { "id": "ウ", "text": "Nginx" },
+            { "id": "エ", "text": "Git" }
+          ],
+          "answer": "イ",
+          "explanation": "Docker は箱を作って動かす道具、Kubernetes はたくさんの箱をまとめて管理する道具です。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "term-code-module-program",
+      "title": "コード・モジュール・プログラム",
+      "field": "実務・IT用語",
+      "category": "開発の基本用語",
+      "level": 1,
+      "sources": ["terms"],
+      "summary": "コードはプログラミング言語で書かれた文字そのもの(材料)。モジュールはコードのひとまとまり(部品)。プログラムはモジュールを組み合わせた全体(完成品)。",
+      "analogy": "プログラム = レシピ全体、モジュール = 「下ごしらえ」「ソース作り」などのパート。",
+      "keyPoints": [
+        "コード(ソースコード)= 書かれた文字(材料・中身)",
+        "モジュール = 機能ごとに分けた部品(ログイン、カート、決済など)",
+        "プログラム = モジュールを集めた全体",
+        "部品に分けると、決済だけ直したいときに他を触らずに済み、再利用もできる",
+        "「コードでモジュールを作り、モジュールを集めてプログラムになる」"
+      ],
+      "explanation": [],
+      "pitfalls": [
+        { "text": "「モジュールとプログラムを合わせてコードと呼ぶってこと?」と要約した。コードは材料で、モジュールもプログラムも中身はコード。", "sourceKey": "terms" }
+      ],
+      "prerequisites": [],
+      "related": ["term-repository", "sw-language-processors"],
+      "terms": [
+        { "term": "モジュール", "definition": "プログラムを機能ごとに分けた部品。" },
+        { "term": "ソースコード", "definition": "プログラミング言語で書かれた、人が読める命令の文字列。" }
+      ],
+      "questions": [
+        {
+          "id": "q-code-1",
+          "type": "choice",
+          "prompt": "コード、モジュール、プログラムの関係として最も適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "モジュールとプログラムを合わせたものをコードと呼ぶ" },
+            { "id": "イ", "text": "コードでモジュールを作り、モジュールを組み合わせてプログラムになる" },
+            { "id": "ウ", "text": "プログラムを分割したものをコードと呼ぶ" },
+            { "id": "エ", "text": "3つは同じものを指す別名である" }
+          ],
+          "answer": "イ",
+          "explanation": "コード = 材料、モジュール = 部品、プログラム = 完成品。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "term-repository",
+      "title": "リポジトリ",
+      "field": "実務・IT用語",
+      "category": "開発の基本用語",
+      "level": 1,
+      "sources": ["terms", "fe3"],
+      "summary": "「保管庫」の意味。開発現場では、1つのプログラム(プロジェクト)に必要なファイル一式と、その変更履歴を管理する場所。試験では、開発情報を一元管理してツール間で共有するデータベース(CASE ツールの中核)。",
+      "analogy": "みんなで編集する共有フォルダ+「いつ誰が何を書き換えたか」の完全な記録帳。",
+      "keyPoints": [
+        "中身:コードだけでなく、設定ファイル、README、画像なども",
+        "ただのフォルダとの違い:過去の状態に戻せる、誰がどこを変えたか分かる、複数人で同時に作業して後で合体できる",
+        "基本は「1つのアプリにつき1つのリポジトリ」",
+        "Git で管理し、GitHub はリポジトリをネット上で共有するサービス",
+        "試験:上流工程で作った情報を保管し、下流工程のツールが共有して使う(CASE ツール)",
+        "データディクショナリ:データ項目の名前・型・意味の辞書。リポジトリの一部"
+      ],
+      "explanation": [],
+      "pitfalls": [
+        { "text": "「リポジトリはプログラムを管理する場所ってこと?」と確認した。合っている。加えて変更履歴も管理する。", "sourceKey": "terms" }
+      ],
+      "prerequisites": ["term-code-module-program"],
+      "related": [],
+      "terms": [
+        { "term": "リポジトリ", "definition": "ファイル一式と変更履歴を一元的に保管・管理する場所。" },
+        { "term": "Git", "definition": "ファイルの変更履歴を管理するバージョン管理ツール。" },
+        { "term": "CASE ツール", "definition": "システム開発の各工程を支援するソフトウェア群。" }
+      ],
+      "questions": [
+        {
+          "id": "q-repo-1",
+          "type": "choice",
+          "prompt": "ソフトウェア開発におけるリポジトリの説明として最も適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "プログラムを機械語に変換するソフトウェア" },
+            { "id": "イ", "text": "ソースコードなどのファイル一式と、その変更履歴を管理する保管場所" },
+            { "id": "ウ", "text": "コンピュータ同士が通信するための約束事" },
+            { "id": "エ", "text": "プログラムを機能ごとに分けた部品" }
+          ],
+          "answer": "イ",
+          "explanation": "アはコンパイラ、ウはプロトコル、エはモジュールです。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        },
+        {
+          "id": "q-repo-2",
+          "type": "choice",
+          "prompt": "CASE ツールにおけるリポジトリの役割として適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "開発工程で作成された設計情報などを一元的に管理し、複数のツールで共有する" },
+            { "id": "イ", "text": "完成したプログラムをユーザに配布する" },
+            { "id": "ウ", "text": "ネットワークの通信量を監視する" },
+            { "id": "エ", "text": "テストデータを自動で生成する" }
+          ],
+          "answer": "ア",
+          "explanation": "上流工程の情報をリポジトリに保管し、下流工程のツールがそれを共有して使います。",
+          "stumbleTags": ["prerequisite"],
+          "origin": "original",
+          "difficulty": 2
+        }
+      ]
+    },
+    {
+      "id": "term-protocol-api",
+      "title": "プロトコルと API",
+      "field": "実務・IT用語",
+      "category": "開発の基本用語",
+      "level": 1,
+      "sources": ["terms", "fe4"],
+      "summary": "プロトコルはコンピュータ同士が通信するときの約束事(運び方のルール)。API はソフト同士をつなぐ受付窓口(何を・どんな書式で頼めるかのルール)。",
+      "analogy": "API はレストランの店員と注文票。厨房(機能の本体)に入らなくても、決まった注文票に書いて渡せば料理が出てくる。プロトコル(HTTPS)は、その注文票をどう運ぶかのルール。",
+      "keyPoints": [
+        "プロトコルの例:HTTPS(Web)、SMTP(メール送信)",
+        "API:中の処理を知らなくても、決まった書式で頼めば結果が返る",
+        "API は LLM 専用ではなく、天気予報・地図・決済など他社の機能を借りる場面で使われる",
+        "多くのアプリは LLM を自分で持たず、API 経由で LLM のサーバに質問を送って答えを受け取る"
+      ],
+      "explanation": [],
+      "pitfalls": [
+        { "text": "「API と LLM も概念が分からないから図にして」と依頼した。", "sourceKey": "terms" }
+      ],
+      "prerequisites": [],
+      "related": ["term-llm", "web-mashup", "nw-mail-protocols"],
+      "terms": [
+        { "term": "プロトコル", "definition": "コンピュータ同士が通信するための取り決め。" },
+        { "term": "API", "definition": "Application Programming Interface。ソフトウェアの機能を外部から利用するための窓口・仕様。" }
+      ],
+      "questions": [
+        {
+          "id": "q-api-1",
+          "type": "choice",
+          "prompt": "API とプロトコルの関係を説明したものとして最も適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "API は通信の運び方のルール、プロトコルは何を頼めるかの窓口である" },
+            { "id": "イ", "text": "API は何をどんな書式で頼めるかの窓口、プロトコルはそれをどう運ぶかの通信のルールである" },
+            { "id": "ウ", "text": "API とプロトコルは同じ意味である" },
+            { "id": "エ", "text": "API は LLM を利用するときにしか使われない" }
+          ],
+          "answer": "イ",
+          "explanation": "注文票の書き方(API)と、注文票の運び方(プロトコル)の違いです。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "term-llm",
+      "title": "LLM(大規模言語モデル)",
+      "field": "実務・IT用語",
+      "category": "AI",
+      "level": 1,
+      "sources": ["terms"],
+      "summary": "大量の文章を学習して、人間のように文章を読んだり書いたりできる AI。仕組みの核心は「次に来る言葉を予測する」ことのくり返し。",
+      "keyPoints": [
+        "Large Language Model の略。GPT や Claude も LLM",
+        "「大規模」= 学習データの量と、内部の調整つまみ(パラメータ)の数が桁外れに多い",
+        "質問への回答、翻訳、要約、コードの生成までできる",
+        "ハルシネーション:事実と違う内容をもっともらしく答えてしまうことがある",
+        "アプリは API 経由で LLM のサーバに質問を送って利用するのが普通"
+      ],
+      "explanation": [],
+      "pitfalls": [],
+      "prerequisites": [],
+      "related": ["term-protocol-api"],
+      "terms": [
+        { "term": "LLM", "definition": "大規模言語モデル。大量のテキストで学習し、文章の理解・生成を行う AI。" },
+        { "term": "ハルシネーション", "definition": "AI が事実と異なる内容を、もっともらしく生成してしまう現象。" }
+      ],
+      "questions": [
+        {
+          "id": "q-llm-1",
+          "type": "choice",
+          "prompt": "LLM の仕組みと注意点の説明として最も適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "インターネットを毎回検索して、正しい答えだけを返す" },
+            { "id": "イ", "text": "次に来る言葉を確率的に予測することをくり返して文章を作るため、事実と違う内容を答えることがある" },
+            { "id": "ウ", "text": "人が書いた回答集から、該当する答えを検索して返す" },
+            { "id": "エ", "text": "学習データにない質問には一切答えられない" }
+          ],
+          "answer": "イ",
+          "explanation": "「それらしい文章」を作るのが得意な反面、ハルシネーションがあるので重要な情報は確認が必要です。",
+          "stumbleTags": ["prerequisite"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "term-incident-debug-patch",
+      "title": "インシデント・デバッグ・パッチ・バッチ処理",
+      "field": "実務・IT用語",
+      "category": "運用・保守",
+      "level": 1,
+      "sources": ["terms"],
+      "summary": "インシデント(障害が発生)→ デバッグ(原因を探して直す)→ パッチ適用(修正部分を配る)→ 復旧、という流れでつながる。バッチ処理はパッチとは全く別物で、データをまとめて一気に処理する方式。",
+      "keyPoints": [
+        "インシデント:サービスが普段通り使えなくなる出来事。まず影響範囲を確認",
+        "デバッグ:バグ(誤り)を見つけて取り除く作業(「デバック」ではない)",
+        "パッチ:修正部分だけをまとめた「当て布」。セキュリティアップデートもその一種",
+        "バッチ処理:溜めたデータを決まったタイミングでまとめて処理(深夜の集計、月1回の給与計算)",
+        "リアルタイム(オンライン)処理:ボタンを押した瞬間に処理"
+      ],
+      "explanation": [],
+      "pitfalls": [
+        { "text": "「パッチ処理」と、パッチとバッチ処理が混ざっていた。", "sourceKey": "terms" }
+      ],
+      "prerequisites": [],
+      "related": ["term-e2e"],
+      "terms": [
+        { "term": "インシデント", "definition": "サービスの中断や品質低下など、通常の運用を妨げる出来事。" },
+        { "term": "パッチ", "definition": "プログラムの不具合や脆弱性を修正するための差分。" },
+        { "term": "バッチ処理", "definition": "データを一定期間・一定量ためて、まとめて処理する方式。" }
+      ],
+      "questions": [
+        {
+          "id": "q-inc-1",
+          "type": "choice",
+          "prompt": "銀行で1日分の取引データを深夜にまとめて集計するような処理方式はどれか。",
+          "choices": [
+            { "id": "ア", "text": "パッチ" },
+            { "id": "イ", "text": "バッチ処理" },
+            { "id": "ウ", "text": "リアルタイム処理" },
+            { "id": "エ", "text": "デバッグ" }
+          ],
+          "answer": "イ",
+          "explanation": "パッチは修正部分の当て布で、バッチ処理とは全く別物です。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        },
+        {
+          "id": "q-inc-2",
+          "type": "choice",
+          "prompt": "システム障害が起きてから復旧するまでの流れとして、最も自然な順番はどれか。",
+          "choices": [
+            { "id": "ア", "text": "パッチ適用 → インシデント → デバッグ → 復旧" },
+            { "id": "イ", "text": "インシデント → デバッグ → パッチ適用 → 復旧" },
+            { "id": "ウ", "text": "デバッグ → インシデント → 復旧 → パッチ適用" },
+            { "id": "エ", "text": "インシデント → パッチ適用 → デバッグ → 復旧" }
+          ],
+          "answer": "イ",
+          "explanation": "障害が起きる → 原因を突き止めて直す → 修正版を配る → 元通り動く。",
+          "stumbleTags": ["prerequisite"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "term-e2e",
+      "title": "エンドツーエンド(E2E)",
+      "field": "実務・IT用語",
+      "category": "開発の基本用語",
+      "level": 1,
+      "sources": ["terms"],
+      "summary": "「端から端まで全部通して」という意味。E2E テストは、利用者と同じ操作で最初から最後まで通しで確認するテスト。E2E 暗号化は、送信者の端末から受信者の端末まで、途中のサーバでも中身を読めない状態で届けること。",
+      "keyPoints": [
+        "E2E テスト:ログイン → カート → 決済 → 注文完了メールまでを通しで確認",
+        "モジュール単体では正しく動いても、つなげると動かないことがあるので最後に確かめる",
+        "E2E 暗号化:途中のサーバでも中身を読めない(LINE など)"
+      ],
+      "explanation": [],
+      "pitfalls": [],
+      "prerequisites": ["term-code-module-program"],
+      "related": ["term-incident-debug-patch"],
+      "terms": [
+        { "term": "E2E テスト", "definition": "システム全体を、利用者の操作の始めから終わりまで通して検証するテスト。" }
+      ],
+      "questions": [
+        {
+          "id": "q-e2e-1",
+          "type": "choice",
+          "prompt": "E2E(エンドツーエンド)テストの説明として適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "1つのモジュールだけを切り出して動作を確認する" },
+            { "id": "イ", "text": "利用者と同じ操作で、システムの最初から最後までを通しで確認する" },
+            { "id": "ウ", "text": "プログラムの行数を数えて規模を見積もる" },
+            { "id": "エ", "text": "通信を暗号化して盗聴を防ぐ" }
+          ],
+          "answer": "イ",
+          "explanation": "アは単体テストです。エは E2E 暗号化の話で、テストではありません。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "term-ec2-b2c",
+      "title": "EC2 と B2B・B2C・C2C",
+      "field": "実務・IT用語",
+      "category": "開発の基本用語",
+      "level": 1,
+      "sources": ["terms"],
+      "summary": "EC2 は AWS の仮想サーバを借りられるサービス(IaaS)。B2B・B2C・C2C は取引相手を表す言葉(B = 企業、C = 消費者)。「E2C」という一般的な用語はほぼない。",
+      "keyPoints": [
+        "EC2 = Elastic Compute Cloud。必要な台数・性能のサーバをすぐ借りて、使った分だけ払う",
+        "B2C:企業 → 個人(Amazon で商品を買う)",
+        "B2B:企業 → 企業(SIer が銀行にシステムを納める)",
+        "C2C:個人 → 個人(メルカリ)"
+      ],
+      "explanation": [],
+      "pitfalls": [
+        { "text": "「E2C は?」と聞いた。EC2 か B2C 系との混同。", "sourceKey": "terms" }
+      ],
+      "prerequisites": [],
+      "related": ["cloud-service-models"],
+      "terms": [
+        { "term": "EC2", "definition": "Amazon Elastic Compute Cloud。AWS の仮想サーバサービス。" },
+        { "term": "C2C", "definition": "Consumer to Consumer。消費者同士の取引。" }
+      ],
+      "questions": [
+        {
+          "id": "q-ec2-1",
+          "type": "choice",
+          "prompt": "フリマアプリのように、個人と個人の間で行われる取引形態はどれか。",
+          "choices": [
+            { "id": "ア", "text": "B2B" },
+            { "id": "イ", "text": "B2C" },
+            { "id": "ウ", "text": "C2C" },
+            { "id": "エ", "text": "EC2" }
+          ],
+          "answer": "ウ",
+          "explanation": "C = Consumer(消費者)。EC2 は AWS の仮想サーバサービスで、取引形態ではありません。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "web-mashup",
+      "title": "マッシュアップ(プレゼンテーション・データ・ロジック)",
+      "field": "テクノロジ系",
+      "category": "ネットワーク",
+      "level": 1,
+      "sources": ["fe4"],
+      "summary": "複数の Web サービスが公開している機能やデータ(API)を組み合わせて、新しいサービスを作ること。何を組み合わせるかで3種類に分かれる。",
+      "analogy": "プレゼンテーション = 雑誌の切り抜きを1枚の紙に貼る、データ = 複数の資料から数字を集めて1つの表にする、ロジック = 工場のライン作業をつなげる。",
+      "keyPoints": [
+        "例:グルメサイト+地図、不動産サイト+地図+天気",
+        "地図や天気を自分で一から作らず、他社の機能を借りる",
+        "プレゼンテーション:画面部品をそのまま並べる(加工しない)",
+        "データ:データを集めて統合・加工し、新しい情報にする",
+        "ロジック:処理を順につなげて一連の仕組みにする(決済 → 発送 → 通知)",
+        "注意点:元サービスの停止・仕様変更の影響、利用規約・料金・回数制限",
+        "APIエコノミー:API を公開して他社と連携し、ビジネスを広げること"
+      ],
+      "explanation": [
+        "| 種類 | 組み合わせる対象 | 加工 |\n|---|---|---|\n| プレゼンテーション | 画面・表示 | しない |\n| データ | データ | する |\n| ロジック | 処理・機能 | 処理を連携 |",
+        "覚え方:「見せるだけ/混ぜて加工/処理をつなぐ」"
+      ],
+      "pitfalls": [],
+      "prerequisites": ["term-protocol-api"],
+      "related": [],
+      "terms": [
+        { "term": "マッシュアップ", "definition": "複数のサービスの API などを組み合わせて、新しいサービスを作る手法。" }
+      ],
+      "questions": [
+        {
+          "id": "q-mash-1",
+          "type": "choice",
+          "prompt": "マッシュアップの説明として適切なものはどれか。",
+          "choices": [
+            { "id": "ア", "text": "複数の Web サービスが提供する機能やデータを組み合わせて、新しいサービスを提供する" },
+            { "id": "イ", "text": "1つのサーバを複数の仮想マシンに分割する" },
+            { "id": "ウ", "text": "データをまとめて夜間に一括処理する" },
+            { "id": "エ", "text": "Web ページの一部だけを非同期通信で書き換える" }
+          ],
+          "answer": "ア",
+          "explanation": "イは仮想化、ウはバッチ処理、エは Ajax です。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 1
+        },
+        {
+          "id": "q-mash-2",
+          "type": "choice",
+          "prompt": "不動産の物件データと地図サービスの位置データを統合し、「駅から徒歩10分以内の物件」を地図上に表示するサービスは、どのマッシュアップにあたるか。",
+          "choices": [
+            { "id": "ア", "text": "プレゼンテーションマッシュアップ" },
+            { "id": "イ", "text": "データマッシュアップ" },
+            { "id": "ウ", "text": "ロジックマッシュアップ" },
+            { "id": "エ", "text": "マッシュアップではない" }
+          ],
+          "answer": "イ",
+          "explanation": "複数のデータを集めて加工し、新しい情報(徒歩10分以内の物件)を作っているのでデータマッシュアップです。",
+          "stumbleTags": ["confusion"],
+          "origin": "original",
+          "difficulty": 2
+        }
+      ]
+    },
+    {
+      "id": "pm-function-point",
+      "title": "見積り手法(FP 法・LOC 法・COCOMO)",
+      "field": "マネジメント系",
+      "category": "プロジェクトマネジメント",
+      "level": 1,
+      "sources": ["fe1"],
+      "summary": "FP 法はソフトウェアの機能(入力画面・出力帳票・ファイルなど)の数と複雑さに点数を付け、合計から工数を見積もる。プログラムを書く前(要件定義の段階)でも見積もれるのが強み。",
+      "keyPoints": [
+        "機能・点数 → FP 法(ファンクションポイント法)",
+        "行数(ステップ数)→ LOC 法",
+        "行数 + 数式で計算(補正係数も使う)→ COCOMO",
+        "COCOMO II:COCOMO の改良版。FP も入力に使えるが、点数を付ける技法そのものではない"
+      ],
+      "explanation": [],
+      "pitfalls": [],
+      "prerequisites": [],
+      "related": [],
+      "terms": [
+        { "term": "FP 法", "definition": "ソフトウェアの機能の数と複雑さを点数化し、規模や工数を見積もる手法。" },
+        { "term": "LOC", "definition": "Lines Of Code。プログラムの行数。" }
+      ],
+      "questions": [
+        {
+          "id": "q-fp-1",
+          "type": "choice",
+          "prompt": "ソフトウェアの入出力画面やファイルなどの機能の数と複雑さに応じて点数を付け、その合計から開発規模を見積もる手法はどれか。",
+          "choices": [
+            { "id": "ア", "text": "COCOMO" },
+            { "id": "イ", "text": "FP 法" },
+            { "id": "ウ", "text": "LOC 法" },
+            { "id": "エ", "text": "COCOMO II" }
+          ],
+          "answer": "イ",
+          "explanation": "機能に点数を付けるのは FP 法。LOC 法は行数、COCOMO は行数をもとに数式で工数を算出します。",
+          "stumbleTags": ["confusion"],
+          "origin": "session-reconstructed",
+          "sourceKey": "fe1",
+          "difficulty": 1
+        }
+      ]
+    },
+    {
+      "id": "or-linear-programming",
+      "title": "線形計画法(図解法)",
+      "field": "ストラテジ系",
+      "category": "企業活動(OR・IE)",
+      "level": 2,
+      "sources": ["lp"],
+      "summary": "制約式を直線として描き、すべての条件を満たす領域(実行可能領域)の頂点を求めて、目的関数に代入する。最適解は必ず頂点に現れる。",
+      "keyPoints": [
+        "① 制約式を直線として描く(x 切片と y 切片を結ぶ)",
+        "② 実行可能領域を特定する(≦ なら直線の下側、x, y ≧ 0 で第1象限)",
+        "③ 頂点をすべて求める(2直線の交点は連立方程式)",
+        "④ 各頂点で目的関数の値を計算する",
+        "⑤ 一番大きい(小さい)ものが答え",
+        "つまずきやすい所:交点の連立計算、不等号の向き(どちら側が領域か)",
+        "3変数以上や「シンプレックス法で」の指定があれば、手順がまったく違う"
+      ],
+      "explanation": [
+        "**例**:x + y ≦ 4、x + 3y ≦ 6、x ≧ 0、y ≧ 0 のとき、2x + 3y を最大にする。\n- x + y = 4 → (4, 0) と (0, 4)\n- x + 3y = 6 → (6, 0) と (0, 2)\n- 頂点:(0, 0)、(4, 0)、(0, 2)、交点\n- 交点:下の式から上の式を引いて 2y = 2 → y = 1、x = 3 → (3, 1)\n- 値:(0,0) → 0、(4,0) → 8、(0,2) → 6、(3,1) → **9**"
+      ],
+      "pitfalls": [
+        { "text": "「線形計画法の計算問題が解けない」と、解き方の手順から質問した。", "sourceKey": "lp" }
+      ],
+      "prerequisites": [],
+      "related": [],
+      "terms": [
+        { "term": "線形計画法", "definition": "1次式の制約条件のもとで、1次式の目的関数を最大化・最小化する手法。" },
+        { "term": "実行可能領域", "definition": "すべての制約条件を同時に満たす点の集まり。" },
+        { "term": "目的関数", "definition": "最大化または最小化したい式(利益など)。" }
+      ],
+      "questions": [
+        {
+          "id": "q-lp-1",
+          "type": "numeric",
+          "prompt": "x + y ≦ 4、x + 3y ≦ 6、x ≧ 0、y ≧ 0 のとき、2x + 3y の最大値はいくつか。",
+          "answer": 9,
+          "tolerance": 0,
+          "explanation": "頂点 (0,0)、(4,0)、(0,2)、(3,1) で計算すると、(3,1) のとき 2×3 + 3×1 = 9 が最大。",
+          "stumbleTags": ["calc"],
+          "origin": "session-reconstructed",
+          "sourceKey": "lp",
+          "difficulty": 2
+        },
+        {
+          "id": "q-lp-2",
+          "type": "numeric",
+          "prompt": "x + y ≦ 5、2x + y ≦ 8、x ≧ 0、y ≧ 0 のとき、3x + 2y の最大値はいくつか。",
+          "answer": 13,
+          "tolerance": 0,
+          "explanation": "頂点は (0,0)、(4,0)、(0,5)、交点。交点は 2x + y = 8 から x + y = 5 を引いて x = 3、y = 2。値は 0、12、10、3×3 + 2×2 = 13。最大13。",
+          "stumbleTags": ["calc"],
+          "origin": "original",
+          "difficulty": 2
+        },
+        {
+          "id": "q-lp-3",
+          "type": "choice",
+          "prompt": "2変数の線形計画問題を図解法で解くとき、最適解が現れる場所はどこか。",
+          "choices": [
+            { "id": "ア", "text": "実行可能領域の中心" },
+            { "id": "イ", "text": "実行可能領域の頂点のいずれか" },
+            { "id": "ウ", "text": "原点だけ" },
+            { "id": "エ", "text": "実行可能領域の外側" }
+          ],
+          "answer": "イ",
+          "explanation": "最適解は必ず頂点に現れるので、頂点を全部求めて代入すれば確実に解けます。",
+          "stumbleTags": ["why"],
+          "origin": "original",
+          "difficulty": 1
+        }
+      ]
+    }
+  ]
+}
