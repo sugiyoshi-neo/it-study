@@ -39,7 +39,9 @@ Vite / React + TypeScript / react-router(HashRouter) / react-markdown + remark-g
 - `npm test`:実際の6パック+人工データで `content-lib.mjs` と一致
 - 一時的に壊れたパックを置くと `npm run build` が止まる(確認後すぐ削除)
 - 公開 URL をスマホで開き、ランダム10問 → 回答 → 解説 → 次の問題
-- `q-trans-1` で「エ」を選ぶと wrongReasons と前提トピックが出る
+- `q-trans-1` で「エ」を選ぶと wrongReasons が出る
+- `q-xor-2`(トピック「XOR・NAND・NOR・XNOR と相補演算」の2問目)で「イ」を選ぶと、wrongReasons と前提トピック「真理値表と基本の論理演算」へのリンクが出る
+  (検証時の修正:当初 q-trans-1 で前提トピックを確認する予定だったが、そのトピックには前提トピックが設定されていないため差し替え)
 - push 後に Actions が成功し、`https://sugiyoshi-neo.github.io/it-study/` が開ける
 
 ## 仮定
