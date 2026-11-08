@@ -104,4 +104,65 @@ describe("mergePacks(TS)と content-lib.mjs の一致", () => {
     expect(ts.sessions.map((s) => s.title)).toEqual(["セッション1(改)", "セッション2"]);
     expect(ts.mergeLog).toEqual(["t1: 2026-01-01_01_a.json に 2026-01-02_01_b.json を統合"]);
   });
+
+  it("dialogues は sourceKey + title で重複を除いて追記される", () => {
+    const turn = (text: string) => [
+      { role: "user", text: "質問" },
+      { role: "assistant", text },
+    ];
+    const loaded = [
+      {
+        file: "2026-01-01_01_a.json",
+        pack: {
+          schemaVersion: 1,
+          packId: "2026-01-01_01_a",
+          title: "A",
+          sources: [{ key: "s1", title: "S1" }],
+          topics: [
+            {
+              id: "t1",
+              title: "T",
+              field: "テクノロジ系",
+              category: "基礎理論",
+              summary: "s",
+              dialogues: [{ sourceKey: "s1", date: "2026-01-01", title: "やりとり1", turns: turn("旧") }],
+            },
+          ],
+        },
+      },
+      {
+        file: "2026-01-02_01_b.json",
+        pack: {
+          schemaVersion: 1,
+          packId: "2026-01-02_01_b",
+          title: "B",
+          sources: [
+            { key: "s1", title: "S1" },
+            { key: "s2", title: "S2" },
+          ],
+          // 既存トピックに dialogues だけを追記するパック
+          topics: [
+            {
+              id: "t1",
+              dialogues: [
+                { sourceKey: "s1", title: "やりとり1", turns: turn("新(重複なので無視)") },
+                { sourceKey: "s2", title: "やりとり1", turns: turn("別セッションなので追加") },
+                { sourceKey: "s1", title: "やりとり2", turns: turn("別タイトルなので追加") },
+              ],
+            },
+          ],
+        },
+      },
+    ] as unknown as LoadedPack[];
+
+    const ts = mergePacks(loaded);
+    expect(ts).toEqual(mergePacksJs(loaded));
+    const t1 = ts.topics[0];
+    expect(t1.title).toBe("T"); // dialogues だけのパックでは他の項目は変わらない
+    expect(t1.dialogues.map((d) => `${d.sourceKey}/${d.title}/${d.turns[1].text}`)).toEqual([
+      "s1/やりとり1/旧",
+      "s2/やりとり1/別セッションなので追加",
+      "s1/やりとり2/別タイトルなので追加",
+    ]);
+  });
 });

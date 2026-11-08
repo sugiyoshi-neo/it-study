@@ -17,6 +17,9 @@
   --warn-border: #e7c35a;
   --analogy-bg: #eef6ff;
   --radius: 12px;
+  --tabbar-h: 58px;
+  --user-bubble: #e8effd;
+  --mark-bg: #ffe58a;
   color-scheme: light dark;
 }
 
@@ -37,6 +40,8 @@
     --warn-bg: #352d14;
     --warn-border: #8a7330;
     --analogy-bg: #172435;
+    --user-bubble: #1f2d48;
+    --mark-bg: #6b5a14;
   }
 }
 
@@ -55,6 +60,8 @@ body {
   font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
   font-size: 16px;
   line-height: 1.7;
+  /* 画面下のタブに本文が隠れないようにする */
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 }
 
 a {
@@ -72,7 +79,8 @@ h2 {
   margin: 1.5rem 0 0.5rem;
 }
 
-.card h2 {
+.card h2,
+.card h4 {
   font-size: 0.95rem;
   margin: 0 0 0.4rem;
 }
@@ -201,13 +209,12 @@ h3 {
   text-decoration: underline;
 }
 
-/* 画面下部に固定する操作ボタン(親指の届く範囲) */
+/* 画面下部(タブのすぐ上)に固定する操作ボタン(親指の届く範囲) */
 .action-bar {
   position: sticky;
-  bottom: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
   margin: 1rem -1rem -1rem;
   padding: 0.6rem 1rem;
-  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
@@ -563,4 +570,553 @@ h3 {
 
 .md pre code {
   padding: 0;
+}
+
+/* ---- 画面下のタブ ---- */
+
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+.tab.active {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* ---- ホーム ---- */
+
+.home-section h2 {
+  margin-top: 1.2rem;
+}
+
+.continue-card {
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.link-list {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.link-list li + li {
+  border-top: 1px solid var(--border);
+}
+
+.link-list a {
+  display: flex;
+  flex-direction: column;
+  padding: 0.65rem 1rem;
+  min-height: 48px;
+  justify-content: center;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.link-list a > span:first-child {
+  font-weight: 600;
+}
+
+.more-link {
+  display: inline-block;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+}
+
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0.5rem 0.4rem;
+}
+
+.toc-list li {
+  border-top: 1px solid var(--border);
+}
+
+.toc-list a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 46px;
+  padding: 0.4rem 0.5rem;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.read-mark {
+  flex-shrink: 0;
+  width: 1.4em;
+  height: 1.4em;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  font-size: 0.8rem;
+  line-height: 1.25em;
+  text-align: center;
+}
+
+.read-mark.on {
+  border-color: var(--ok);
+  background: var(--ok);
+  color: var(--surface);
+  font-weight: 700;
+}
+
+.toc-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.bookmark-mark {
+  color: #e0a100;
+}
+
+.home-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+/* ---- 読み物(トピック・セッション) ---- */
+
+.reading {
+  font-size: 17px;
+  line-height: 1.95;
+}
+
+.reading h1 {
+  font-size: 1.5rem;
+}
+
+.breadcrumb {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+}
+
+.breadcrumb a {
+  color: inherit;
+}
+
+.topic-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.topic-head h1 {
+  flex: 1;
+}
+
+.bookmark-button {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 52px;
+  min-height: 52px;
+  margin-top: 0.3rem;
+  padding: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.bookmark-button span {
+  font-size: 0.65rem;
+}
+
+.bookmark-button.on {
+  color: #e0a100;
+  border-color: #e0a100;
+}
+
+.source-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.3rem 0 0.8rem;
+}
+
+.chip {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  text-decoration: none;
+}
+
+.page-toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.page-toc summary {
+  font-weight: 700;
+  cursor: pointer;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.page-toc ol {
+  margin: 0.2rem 0 0.4rem;
+  padding-left: 1.4rem;
+}
+
+.page-toc ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.page-toc button {
+  /* 長い見出しが折り返しても、行頭の記号が1行目に付くようにする */
+  display: block;
+  background: none;
+  border: none;
+  padding: 0.3rem 0;
+  color: var(--primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.topic-section {
+  scroll-margin-top: 3.5rem;
+}
+
+.topic-section > h2 {
+  font-size: 1.2rem;
+  margin: 2rem 0 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid var(--primary);
+}
+
+.topic-section h3 {
+  font-size: 1.02rem;
+}
+
+.summary {
+  font-size: 1.05em;
+  margin: 0.4rem 0;
+}
+
+.reading .card {
+  line-height: 1.85;
+}
+
+.diagram {
+  overflow-x: auto;
+  margin: 0.8rem 0;
+  padding: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+
+.diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.diagram-loading {
+  padding: 1.5rem;
+}
+
+.diagram-failed {
+  text-align: left;
+}
+
+.formulas div + div,
+.terms div + div {
+  border-top: 1px solid var(--border);
+}
+
+.formulas dt,
+.terms dt {
+  font-weight: 700;
+  margin-top: 0.4rem;
+}
+
+.formulas dd,
+.terms dd {
+  margin: 0 0 0.5rem;
+}
+
+.terms {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.3rem 1rem;
+  margin: 0.5rem 0;
+}
+
+.pitfalls {
+  background: var(--warn-bg);
+  border: 2px solid var(--warn-border);
+}
+
+.card .pitfalls-lead {
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.comparison summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.card .comparison-one-liner {
+  margin: 0.5rem 0;
+}
+
+.comparison table {
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.comparison th,
+.comparison td {
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+  min-width: 6em;
+}
+
+.questions-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.3rem 1rem 0.8rem;
+}
+
+.questions-box > summary {
+  font-weight: 700;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--primary);
+}
+
+.inline-question {
+  border-top: 1px solid var(--border);
+  padding-top: 0.6rem;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.inline-question h3 {
+  margin: 0.2rem 0;
+}
+
+.inline-actions {
+  margin: 0.6rem 0;
+}
+
+.read-footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+/* ---- チャットでのやりとり ---- */
+
+.dialogue {
+  margin: 1rem 0 1.8rem;
+  scroll-margin-top: 3.5rem;
+}
+
+.dialogue + .dialogue {
+  padding-top: 1rem;
+  border-top: 1px dashed var(--border);
+}
+
+.dialogue-title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.dialogue-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.8rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+}
+
+.turn {
+  margin: 0.6rem 0;
+}
+
+.turn-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* 質問は短いことが多いので、右寄せの小さな吹き出しにする */
+.turn-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.turn-user .bubble {
+  max-width: 85%;
+  padding: 0.5rem 0.9rem;
+  border-radius: 16px 16px 4px 16px;
+  background: var(--user-bubble);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+/* 解説が主役。全幅で読みやすく */
+.turn-assistant {
+  padding: 0.2rem 0 0.2rem 0.8rem;
+  border-left: 3px solid var(--primary);
+}
+
+/* 解説の中の見出しは、ページの見出しより小さくする */
+.turn-assistant .md h1,
+.turn-assistant .md h2 {
+  font-size: 1.02rem;
+  margin: 1.1rem 0 0.3rem;
+}
+
+.turn-assistant .md h3,
+.turn-assistant .md h4 {
+  font-size: 0.95rem;
+  margin: 0.9rem 0 0.2rem;
+}
+
+.md ul,
+.md ol {
+  padding-left: 1.3rem;
+  margin: 0.4rem 0;
+}
+
+.md td,
+.md th {
+  line-height: 1.6;
+}
+
+/* ---- 検索 ---- */
+
+.search-input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0.5rem 0.9rem;
+  font: inherit;
+  font-size: 1.05rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.search-results {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+}
+
+.search-results > li {
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.search-topic {
+  display: block;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.search-hit {
+  display: block;
+  margin-top: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.search-hit-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.search-snippet {
+  overflow-wrap: anywhere;
+}
+
+mark {
+  background: var(--mark-bg);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 3px;
+}
+
+.read-inline {
+  color: var(--ok);
+  font-size: 0.85rem;
+}
+
+.session-topics summary {
+  font-weight: 700;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }

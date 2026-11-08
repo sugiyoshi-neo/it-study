@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { Markdown } from "../components/Markdown";
-import { allQuestions, topicById, type QuestionEntry } from "../content/load";
-import type { Question } from "../content/types";
-import { isCorrect, isPracticeMode, parseNumber, pickQuestions } from "../practice/logic";
-
-type AnswerRecord = { answer: string; correct: boolean; confident: boolean };
+import { QuestionCard, type AnswerRecord } from "../components/QuestionCard";
+import { allQuestions, type QuestionEntry } from "../content/load";
+import { isPracticeMode, pickQuestions } from "../practice/logic";
 
 type SessionState = { questionIds: string[]; index: number; answers: (AnswerRecord | undefined)[] };
 
@@ -44,7 +41,7 @@ function PracticeSession({ cacheKey }: { cacheKey: string }) {
     return (
       <div className="page">
         <p>出題できる問題が見つかりませんでした。</p>
-        <Link to="/">出題の選び方に戻る</Link>
+        <Link to="/drill">出題の選び方に戻る</Link>
       </div>
     );
   }
@@ -62,238 +59,49 @@ function PracticeSession({ cacheKey }: { cacheKey: string }) {
     );
   }
 
-  return (
-    <QuestionView
-      key={state.index}
-      entry={entries[state.index]}
-      position={state.index + 1}
-      total={entries.length}
-      record={state.answers[state.index]}
-      onAnswer={(record) =>
-        setState((s) => {
-          const answers = [...s.answers];
-          answers[s.index] = record;
-          return { ...s, answers };
-        })
-      }
-      onNext={() => {
-        window.scrollTo(0, 0);
-        setState((s) => ({ ...s, index: s.index + 1 }));
-      }}
-    />
-  );
-}
-
-function QuestionView({
-  entry,
-  position,
-  total,
-  record,
-  onAnswer,
-  onNext,
-}: {
-  entry: QuestionEntry;
-  position: number;
-  total: number;
-  record: AnswerRecord | undefined;
-  onAnswer: (r: AnswerRecord) => void;
-  onNext: () => void;
-}) {
-  const { question, topic } = entry;
-  const [selected, setSelected] = useState<string | null>(null);
-  const [numericInput, setNumericInput] = useState("");
-  const [showAid, setShowAid] = useState(false);
-  const feedbackRef = useRef<HTMLDivElement>(null);
-  const answeredNow = useRef(false);
-
-  useEffect(() => {
-    // 回答した直後だけ、結果の位置までスクロールする(戻ってきたときは動かさない)
-    if (record && answeredNow.current) {
-      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [record]);
-
-  const current = record ? record.answer : question.type === "choice" ? selected : numericInput;
-  const numericInvalid = question.type === "numeric" && numericInput.trim() !== "" && parseNumber(numericInput) === null;
-  const canAnswer = !record && current !== null && current.trim() !== "" && !numericInvalid;
-
-  const submit = (confident: boolean) => {
-    if (!canAnswer || current === null) return;
-    answeredNow.current = true;
-    onAnswer({ answer: current, correct: isCorrect(question, current), confident });
-  };
+  const { question, topic } = entries[state.index];
+  const position = state.index + 1;
 
   return (
     <div className="page practice">
       <p className="progress">
         <span>
-          {position} / {total}
+          {position} / {entries.length}
         </span>
         <span className="muted">{topic.title}</span>
       </p>
-
-      <p className="prompt">{question.prompt}</p>
-
-      {question.readingAid && (
-        <>
-          <button type="button" className="link-button" aria-expanded={showAid} onClick={() => setShowAid((v) => !v)}>
-            {showAid ? "言い換えを閉じる" : "問題文を言い換える"}
-          </button>
-          {showAid && (
-            <div className="card aid">
-              <Markdown>{question.readingAid}</Markdown>
-            </div>
-          )}
-        </>
-      )}
-
-      {question.type === "choice" ? (
-        <ul className="choices">
-          {question.choices.map((c) => {
-            const isChosen = current === c.id;
-            const isAnswer = c.id === question.answer;
-            let cls = "choice";
-            let mark = "";
-            if (record) {
-              if (isAnswer) {
-                cls += " correct";
-                mark = "○ 正解";
-              } else if (isChosen) {
-                cls += " wrong";
-                mark = "✕ あなたの回答";
-              }
-            } else if (isChosen) {
-              cls += " selected";
-            }
-            return (
-              <li key={c.id}>
-                <button
-                  type="button"
-                  className={cls}
-                  aria-pressed={isChosen}
-                  disabled={!!record}
-                  onClick={() => setSelected(c.id)}
-                >
-                  <span className="choice-id">{c.id}</span>
-                  <span className="choice-text">{c.text}</span>
-                  {mark && <span className="choice-mark">{mark}</span>}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <form
-          className="numeric"
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
-          <label>
-            <span>答え</span>
-            <input
-              type="text"
-              inputMode="decimal"
-              autoComplete="off"
-              value={record ? record.answer : numericInput}
-              disabled={!!record}
-              onChange={(e) => setNumericInput(e.target.value)}
-              aria-invalid={numericInvalid}
-            />
-            {question.unit && <span>{question.unit}</span>}
-          </label>
-          {numericInvalid && <p className="error">数字で入力してください</p>}
-        </form>
-      )}
-
-      {record && (
-        <div ref={feedbackRef} className="feedback">
-          <Feedback question={question} record={record} prerequisites={topic.prerequisites} />
-        </div>
-      )}
-
-      <div className="action-bar">
-        {!record ? (
-          <>
-            <p className="action-hint">{canAnswer ? "自信の度合いを選んで回答" : "答えを選んでください"}</p>
-            <div className="button-row">
-              <button type="button" className="button" disabled={!canAnswer} onClick={() => submit(false)}>
-                たぶん
-              </button>
-              <button type="button" className="button primary" disabled={!canAnswer} onClick={() => submit(true)}>
-                自信あり
-              </button>
-            </div>
-          </>
-        ) : (
+      <QuestionCard
+        key={state.index}
+        question={question}
+        prerequisites={topic.prerequisites}
+        record={state.answers[state.index]}
+        onAnswer={(record) =>
+          setState((s) => {
+            const answers = [...s.answers];
+            answers[s.index] = record;
+            return { ...s, answers };
+          })
+        }
+        sticky
+        footer={
           <div className="button-row">
             <Link to={`/topic/${topic.id}`} className="button">
               トピックを読む
             </Link>
-            <button type="button" className="button primary" onClick={onNext}>
-              {position < total ? "次の問題" : "結果を見る"}
+            <button
+              type="button"
+              className="button primary"
+              onClick={() => {
+                window.scrollTo(0, 0);
+                setState((s) => ({ ...s, index: s.index + 1 }));
+              }}
+            >
+              {position < entries.length ? "次の問題" : "結果を見る"}
             </button>
           </div>
-        )}
-      </div>
+        }
+      />
     </div>
-  );
-}
-
-function answerText(question: Question): string {
-  if (question.type === "choice") {
-    const c = question.choices.find((x) => x.id === question.answer);
-    return c ? `${c.id}:${c.text}` : question.answer;
-  }
-  return `${question.answer}${question.unit ? ` ${question.unit}` : ""}`;
-}
-
-function Feedback({
-  question,
-  record,
-  prerequisites,
-}: {
-  question: Question;
-  record: AnswerRecord;
-  prerequisites: string[];
-}) {
-  const wrongReason =
-    !record.correct && question.type === "choice" ? question.wrongReasons?.[record.answer] : undefined;
-  const prereqTopics = prerequisites.map((p) => topicById.get(p)).filter((t) => t !== undefined);
-
-  return (
-    <>
-      <section className={`verdict ${record.correct ? "ok" : "ng"}`} aria-live="polite">
-        <p className="verdict-title">{record.correct ? "○ 正解" : "✕ 不正解"}</p>
-        {!record.correct && <p>正解は {answerText(question)}</p>}
-        <p className="muted">{record.confident ? "「自信あり」で回答" : "「たぶん」で回答"}</p>
-      </section>
-
-      {wrongReason && (
-        <section className="card wrong-reason">
-          <h2>この選択肢を選んだなら、こう考えたのでは?</h2>
-          <Markdown>{wrongReason}</Markdown>
-        </section>
-      )}
-
-      <section className="card">
-        <h2>解説</h2>
-        <Markdown>{question.explanation}</Markdown>
-      </section>
-
-      {!record.correct && prereqTopics.length > 0 && (
-        <section className="card prereq">
-          <h2>ここに戻ると解きやすくなります</h2>
-          <ul>
-            {prereqTopics.map((t) => (
-              <li key={t.id}>
-                <Link to={`/topic/${t.id}`}>{t.title}</Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-    </>
   );
 }
 
@@ -329,7 +137,7 @@ function ResultView({
       </ul>
       <div className="action-bar">
         <div className="button-row">
-          <Link to="/" className="button">
+          <Link to="/drill" className="button">
             選び方に戻る
           </Link>
           <button type="button" className="button primary" onClick={onRetry}>

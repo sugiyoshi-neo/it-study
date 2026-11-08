@@ -7,5 +7,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: "node",
+    // 教材パックを足したとき、古い読み込み結果(キャッシュ)でテストが通ってしまわないようにする
+    fsModuleCache: false,
   },
 });

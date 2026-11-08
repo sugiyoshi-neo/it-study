@@ -40,6 +40,16 @@ export type NumericQuestion = QuestionBase & {
 
 export type Question = ChoiceQuestion | NumericQuestion;
 
+/** チャットでのやりとり(原文) */
+export type DialogueTurn = { role: "user" | "assistant"; text: string };
+
+export type Dialogue = {
+  sourceKey: string;
+  date?: string;
+  title: string;
+  turns: DialogueTurn[];
+};
+
 export type Topic = {
   id: string;
   title: string;
@@ -58,6 +68,7 @@ export type Topic = {
   related?: string[];
   terms?: { term: string; definition: string }[];
   questions?: Question[];
+  dialogues?: Dialogue[];
 };
 
 export type Comparison = {
@@ -109,6 +120,7 @@ export type MergedTopic = Topic &
       | "related"
       | "terms"
       | "questions"
+      | "dialogues"
     >
   >;
 

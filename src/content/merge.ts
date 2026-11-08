@@ -26,6 +26,7 @@ const ARRAY_FIELDS = [
   "related",
   "terms",
   "questions",
+  "dialogues",
 ] as const;
 const SCALAR_FIELDS = ["title", "field", "category", "level", "summary", "analogy", "diagram"] as const;
 
@@ -33,6 +34,8 @@ type Loose = Record<string, unknown>;
 
 function keyOf(item: unknown): string {
   if (item === null || typeof item !== "object") return JSON.stringify(item);
+  // チャットのやりとり(dialogues)は、セッション + タイトルで同じものと判定する
+  if ("turns" in item) return `dialogue:${(item as Loose).sourceKey}|${(item as Loose).title}`;
   if ("id" in item) return `id:${(item as Loose).id}`;
   if ("term" in item) return `term:${(item as Loose).term}`;
   if ("name" in item) return `name:${(item as Loose).name}`;
@@ -56,7 +59,7 @@ function appendUnique(base: unknown[], extra: unknown[]): unknown[] {
 /**
  * 統合ルール(ファイル名順に適用)
  * - topics は id で統合する。後のパックに同じ id があれば:
- *   - 配列フィールドは追記(重複は除く。問題は id、用語は term で判定)
+ *   - 配列フィールドは追記(重複は除く。問題は id、用語は term、やりとりは sourceKey + title で判定)
  *   - スカラーフィールドは、後のパックで値があれば上書き
  * - comparisons / symbols / guides は id で統合し、後のパックが丸ごと上書き
  * - sources(セッション一覧)は key で統合

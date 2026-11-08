@@ -5,7 +5,7 @@
 //   node tools/validate.mjs --index    … 検査して content/topic-index.md を書き出す
 //                                        (新しいセッションを追加するとき、チャットに渡す一覧)
 
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadPacks, mergePacks, STUMBLE_TAGS, FIELDS } from "./content-lib.mjs";
@@ -36,6 +36,25 @@ for (const { file, pack } of loaded) {
       if (p.sourceKey && !sourceKeys.has(p.sourceKey)) err(`${where}: pitfalls の sourceKey "${p.sourceKey}" が未定義`);
     }
 
+    if (t.dialogues !== undefined && !Array.isArray(t.dialogues)) err(`${where}: dialogues は配列にしてください`);
+    const dialogueKeys = new Set();
+    for (const [i, d] of (Array.isArray(t.dialogues) ? t.dialogues : []).entries()) {
+      const dw = `${where} / dialogues[${i}]`;
+      if (d === null || typeof d !== "object") { err(`${dw}: { sourceKey, title, turns } の形にしてください`); continue; }
+      if (!d.sourceKey) err(`${dw}: sourceKey がありません`);
+      else if (!sourceKeys.has(d.sourceKey)) err(`${dw}: sourceKey "${d.sourceKey}" がパックの sources にありません`);
+      if (!d.title) err(`${dw}: title がありません`);
+      if (d.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(d.date)) warn(`${dw}: date は YYYY-MM-DD の形にしてください`);
+      const dk = `${d.sourceKey}|${d.title}`;
+      if (dialogueKeys.has(dk)) warn(`${dw}: 同じ sourceKey と title のやりとりが重複しています(後の方は統合時に無視されます)`);
+      dialogueKeys.add(dk);
+      if (!Array.isArray(d.turns) || d.turns.length === 0) { err(`${dw}: turns がありません`); continue; }
+      for (const [j, turn] of d.turns.entries()) {
+        if (!["user", "assistant"].includes(turn?.role)) err(`${dw} / turns[${j}]: role は "user" か "assistant"`);
+        if (typeof turn?.text !== "string" || !turn.text.trim()) err(`${dw} / turns[${j}]: text がありません`);
+      }
+    }
+
     for (const q of t.questions ?? []) {
       const qw = `${where} / ${q.id}`;
       if (!q.id) { err(`${where}: id のない問題があります`); continue; }
@@ -63,6 +82,52 @@ for (const { file, pack } of loaded) {
       if (q.sourceKey && !sourceKeys.has(q.sourceKey)) err(`${qw}: sourceKey "${q.sourceKey}" が未定義`);
     }
   }
+}
+
+// ---- 個人情報の検査 ----
+// 公開リポジトリ・公開サイトに載るため、個人情報らしい文字を探す。
+// - メールアドレス・電話番号・郵便番号の形:警告(教材の数字と見分けにくいので、目で確かめる)
+// - content/private-words.txt の言葉(本名・勤務先など):エラー。このファイルは .gitignore 対象で、PC にだけ置く
+const privateWordsPath = join(root, "content", "private-words.txt");
+const normalize = (s) => s.normalize("NFKC").toLowerCase();
+const privateWords = existsSync(privateWordsPath)
+  ? readFileSync(privateWordsPath, "utf8")
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith("#"))
+  : [];
+const PERSONAL_PATTERNS = [
+  { name: "メールアドレス", re: /[\w.+-]+@[\w-]+\.[\w.-]+/g },
+  // 2進数(0と1だけ)は電話番号と見分けられないので除く
+  { name: "電話番号", re: /(?<![\d-])0\d{1,3}-\d{2,4}-\d{4}(?![\d-])/g, skip: (m) => !/[2-9]/.test(m) },
+  { name: "郵便番号", re: /〒\s?\d{3}-?\d{4}/g },
+];
+
+function walkStrings(value, path, fn) {
+  if (typeof value === "string") fn(value, path);
+  else if (Array.isArray(value)) value.forEach((v, i) => walkStrings(v, `${path}[${i}]`, fn));
+  else if (value && typeof value === "object") {
+    for (const [k, v] of Object.entries(value)) walkStrings(v, path ? `${path}.${k}` : k, fn);
+  }
+}
+
+function checkPersonal(text, where) {
+  if (/^https:\/\/claude\.ai\//.test(text)) return; // 元のチャットへのリンクは対象外
+  const norm = normalize(text);
+  for (const w of privateWords) {
+    if (norm.includes(normalize(w))) err(`${where}: 公開したくない言葉「${w}」が含まれています(content/private-words.txt)`);
+  }
+  for (const p of PERSONAL_PATTERNS) {
+    for (const m of text.matchAll(p.re)) {
+      if (!p.skip?.(m[0])) warn(`${where}: ${p.name}のような文字「${m[0]}」があります。個人情報でないか確認してください`);
+    }
+  }
+}
+
+for (const { file, pack } of loaded) {
+  const { topics = [], ...rest } = pack;
+  walkStrings(rest, "", (s, path) => checkPersonal(s, `${file} / ${path}`));
+  for (const t of topics) walkStrings(t, "", (s, path) => checkPersonal(s, `${file} / ${t.id} / ${path}`));
 }
 
 // ---- 統合後の検査 ----
@@ -98,7 +163,9 @@ for (const id of prereq.keys()) visit(id, []);
 const qCount = merged.topics.reduce((n, t) => n + (t.questions?.length ?? 0), 0);
 const missed = merged.topics.reduce((n, t) => n + (t.questions ?? []).filter((q) => q.missedInSession).length, 0);
 console.log(`パック ${loaded.length} 件 / トピック ${merged.topics.length} 件 / 問題 ${qCount} 問(うちセッションで誤答 ${missed} 問)`);
-console.log(`比較カード ${merged.comparisons.length} 件 / 記号 ${merged.symbols.length} 件 / ガイド ${merged.guides.length} 件`);
+const dialogueCount = merged.topics.reduce((n, t) => n + (t.dialogues?.length ?? 0), 0);
+console.log(`比較カード ${merged.comparisons.length} 件 / 記号 ${merged.symbols.length} 件 / ガイド ${merged.guides.length} 件 / やりとり ${dialogueCount} 件`);
+if (privateWords.length) console.log(`個人情報の検査:公開したくない言葉 ${privateWords.length} 件で確認しました`);
 if (merged.mergeLog.length) console.log(`統合:\n  ${merged.mergeLog.join("\n  ")}`);
 if (warnings.length) console.log(`\n警告 ${warnings.length} 件:\n  ${warnings.join("\n  ")}`);
 if (errors.length) {
